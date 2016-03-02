@@ -15,36 +15,53 @@
 
 package com.reactific.akkarafer
 
-import com.reactific.sbt.ProjectPluginTrait
+import com.reactific.sbt.{SubProjectPluginTrait, ProjectPluginTrait}
 
 import sbt.Keys._
 import sbt._
 
-case class KarafFeature() extends Plugin {
+case class Config(pid: String, items: Map[String,String])
+case class Bundle(url: String, startLevel: Int = 50, start: Boolean = true)
+case class FeatureRef(name: String, version: Option[String])
+case class Feature(
+    name : String,
+    version: String,
+    description: Option[String],
+    installOnBoot : Boolean = true,
+    bundles: Seq[Bundle] = Seq.empty[Bundle],
+    configuration: Seq[Config] = Seq.empty[Config],
+    dependentFeatures: Seq[FeatureRef] = Seq.empty[FeatureRef]
+) {
+  def genXML(file : File) : Unit = {
 
+  }
 }
 
 /** An SBT Plugin For Akka/Karaf Projects */
-class AkkaraferPlugin extends ProjectPluginTrait {
-
-  override def autoplugins : Seq[AutoPlugin] = super.autoplugins
+object AkkaraferPlugin extends ProjectPluginTrait {
 
   object branding {
-    val
+    val welcome = settingKey[String]("The welcome banner to display in the console per your branding.")
+    val prompt = settingKey[String]("The console prompt for your branding.")
   }
 
-  object Vers {
-    val akka = "2.4.2"
-    val config = "1.3.0"
-    val pax = "2.4.6"
-    val domino = "1.1.1"
-    val karaf = "4.0.4"
+  object configuration {
+    val features = settingKey[Feature]("The features to be ")
   }
 
   /**
     * Define the values of the settings
     */
   override def projectSettings: Seq[Setting[_]] = {
+
+    object Vers {
+      val akka = "2.4.2"
+      val config = "1.3.0"
+      val pax = "2.4.6"
+      val domino = "1.1.1"
+      val karaf = "4.0.4"
+    }
+
     super.projectSettings ++ Seq (
       libraryDependencies ++= Seq(
         "org.apache.karaf" % "apache-karaf" % Vers.karaf,

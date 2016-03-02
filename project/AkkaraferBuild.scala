@@ -77,7 +77,7 @@ object AkkaraferBuild extends Build {
       // Libraries for the project we plug into
       libraryDependencies ++= Seq (
         "org.slf4j" % "slf4j-simple" % "1.7.12",
-        pluginModuleID("com.reactific" % "sbt-project" % "0.7.0"),
+        pluginModuleID("com.reactific" % "sbt-project" % "0.8.0-SNAPSHOT"),
         pluginModuleID("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
       ),
 
