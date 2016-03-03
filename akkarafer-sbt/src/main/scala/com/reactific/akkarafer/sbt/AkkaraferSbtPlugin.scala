@@ -13,12 +13,12 @@
   * the specific language governing permissions and limitations under the License.                                     *
   **********************************************************************************************************************/
 
-package com.reactific.akkarafer
+package com.reactific.akkarafer.sbt
 
-import com.reactific.sbt.{SubProjectPluginTrait, ProjectPluginTrait}
-
-import sbt.Keys._
 import sbt._
+import sbt.Keys._
+
+import java.io.File
 
 case class Config(pid: String, items: Map[String,String])
 case class Bundle(url: String, startLevel: Int = 50, start: Boolean = true)
@@ -38,7 +38,7 @@ case class Feature(
 }
 
 /** An SBT Plugin For Akka/Karaf Projects */
-object AkkaraferPlugin extends ProjectPluginTrait {
+object AkkaraferSbtPlugin extends AutoPlugin {
 
   object branding {
     val welcome = settingKey[String]("The welcome banner to display in the console per your branding.")
@@ -49,37 +49,6 @@ object AkkaraferPlugin extends ProjectPluginTrait {
     val features = settingKey[Feature]("The features to be ")
   }
 
-  /**
-    * Define the values of the settings
-    */
-  override def projectSettings: Seq[Setting[_]] = {
-
-    object Vers {
-      val akka = "2.4.2"
-      val config = "1.3.0"
-      val pax = "2.4.6"
-      val domino = "1.1.1"
-      val karaf = "4.0.4"
-    }
-
-    super.projectSettings ++ Seq (
-      libraryDependencies ++= Seq(
-        "org.apache.karaf" % "apache-karaf" % Vers.karaf,
-        "com.github.domino-osgi" %% "domino" % Vers.domino,
-        "org.ops4j.pax.url" % "pax-url-link" % Vers.pax,
-        "org.ops4j.pax.url" % "pax-url-mvn" % Vers.pax,
-        "org.ops4j.pax.url" % "pax-url-obr" % Vers.pax,
-        "org.ops4j.pax.url" % "pax-url-wrap" % Vers.pax,
-        "com.typesafe"      % "config" % Vers.config,
-        "com.typesafe.akka" %% "akka-osgi" % Vers.akka,
-        "com.typesafe.akka" %% "akka-actor" % Vers.akka,
-        "com.typesafe.akka" %% "akka-http-core" % Vers.akka,
-        "com.typesafe.akka" %% "akka-http-experimental" % Vers.akka,
-        "com.typesafe.akka" %% "akka-testkit" % Vers.akka % "test",
-        "com.typesafe.akka" %% "akka-http-testkit" % Vers.akka % "test"
-      )
-    )
-  }
 }
 
 

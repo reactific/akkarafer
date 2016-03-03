@@ -13,105 +13,81 @@
   **********************************************************************************************************************/
 
 
-import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt._
-import sbt.mavenint.PomExtraDependencyAttributes
-import sbtrelease.ReleasePlugin.autoImport._
-import sbtrelease.ReleaseStateTransformations._
-import sbtrelease.Version.Bump.Next
-import xerial.sbt.Sonatype
+
+import com.reactific.sbt.ProjectPlugin
+import com.reactific.sbt.ProjectPlugin.identity._
+import sbtbuildinfo.BuildInfoKeys._
+import scoverage.ScoverageSbtPlugin
 
 /** Main Build Definition For RestOmnia */
 object AkkaraferBuild extends Build {
 
-  lazy val akkarafer_resolvers = Seq(
-    "BinTray-sbt" at "https://dl.bintray.com/sbt/sbt-plugin-releases",
-    "BinTray-Typesafe" at "https://dl.bintray.com/typesafe/ivy-releases",
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots"),
-    "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
-    "jgit-repo" at "http://download.eclipse.org/jgit/maven"
+  object Vers {
+    val akka = "2.4.2"
+    val config = "1.3.0"
+    val domino = "1.1.1"
+    val karaf = "4.0.4"
+  }
+
+  val root_dependencies = Seq(
+    "org.apache.karaf" % "apache-karaf" % "4.0.4",
+    "com.github.domino-osgi" %% "domino" % Vers.domino,
+    "org.ops4j.pax.url" % "pax-url-link" % "2.4.6",
+    "org.ops4j.pax.url" % "pax-url-mvn" % "1.3.6",
+    "org.ops4j.pax.url" % "pax-url-obr" % "2.4.6",
+    "org.ops4j.pax.url" % "pax-url-wrap" % "2.4.6",
+    "com.typesafe"      % "config" % Vers.config,
+    "com.typesafe.akka" %% "akka-osgi" % Vers.akka,
+    "com.typesafe.akka" %% "akka-actor" % Vers.akka,
+    "com.typesafe.akka" %% "akka-http-core" % Vers.akka,
+    "com.typesafe.akka" %% "akka-http-experimental" % Vers.akka,
+    "com.typesafe.akka" %% "akka-testkit" % Vers.akka % "test",
+    "com.typesafe.akka" %% "akka-http-testkit" % Vers.akka % "test"
   )
 
-  val sonatype = publishTo :=
-    Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots")
+  val classesIgnoredByScoverage : String = Seq[String](
+    "<empty>", // Avoids warnings from scoverage
+    "com.reactific.akkarafer.BuildInfo"
+  ).mkString(";")
 
-  lazy val akkarafer = Project("akkarafer", file("."))
-    .enablePlugins(Sonatype)
-    .settings(ScriptedPlugin.scriptedSettings)
-    .settings(
-      sbtPlugin       := true,
-      organization    := "com.reactific",
-      scalaVersion    := "2.10.5",
-      scalacOptions   ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint"),
-      logLevel        := Level.Info,
-      resolvers       ++= akkarafer_resolvers,
-      // Scripted - sbt plugin tests
-      ScriptedPlugin.scriptedLaunchOpts := {
-        ScriptedPlugin.scriptedLaunchOpts.value ++ Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
-      },
-      ScriptedPlugin.scriptedBufferLog := false,
 
-      // Release process
-      releaseUseGlobalVersion := true,
-      releaseVersionBump := Next,
-      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-      releaseProcess := Seq[ReleaseStep](
-        checkSnapshotDependencies,
-        inquireVersions,
-        runClean,
-        runTest,
-        releaseStepCommand("scripted"),
-        setReleaseVersion,
-        commitReleaseVersion,
-        tagRelease,
-        releaseStepCommand("packageBin"),
-        publishArtifacts,
-        setNextVersion,
-        commitNextVersion,
-        ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
-        pushChanges
-      ),
+  lazy val akkarafer = Project("akkarafer", file(".")).
+    enablePlugins(ProjectPlugin).
+    settings(
+      scalaVersion := "2.11.7",
+      organization := "com.reactific",
+      titleForDocs := "Akkarafer",
+      codePackage := "com.reactific.akkarafer",
+      copyrightHolder := "Reactific Software LLC",
+      copyrightYears := Seq(2016),
+      developerUrl := url("http://reactific.com/"),
+      maxErrors := 50,
+      buildInfoObject := "BuildInfo",
+      buildInfoPackage := "com.reactific.akkarafer",
+      ScoverageSbtPlugin.ScoverageKeys.coverageMinimum := 90,
+      ScoverageSbtPlugin.ScoverageKeys.coverageFailOnMinimum := true,
+      ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := classesIgnoredByScoverage,
+      libraryDependencies ++= root_dependencies
+    ).
+    aggregate(sbt)
 
-      // Libraries for the project we plug into
-      libraryDependencies ++= Seq (
-        "org.slf4j" % "slf4j-simple" % "1.7.12",
-        pluginModuleID("com.reactific" % "sbt-project" % "0.8.0-SNAPSHOT"),
-        pluginModuleID("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
-      ),
-
-      // Publishing to sonatype
-      Sonatype.SonatypeKeys.sonatypeProfileName := "org.scrupal",
-      publishMavenStyle := true,
-      publishArtifact in Test := false,
-      pomIncludeRepository := { _ => false },
-      licenses := Seq("Apache2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-      homepage := Some(new URL("https://github.com/scrupal/" + normalizedName.value + ".git")),
-      pomExtra in Global := {
-        <scm>
-          <url>git@github.com:scrupal/scrupal-sbt.git</url>
-          <connection>scm:git:git@github.com:scrupal/scrupal-sbt.git</connection>
-        </scm>
-          <developers>
-            <developer>
-              <id>reid-spencer</id>
-              <name>Reid Spencer</name>
-              <url>https://github.com/reid-spencer</url>
-            </developer>
-          </developers>
-      }
+  lazy val sbt = Project("akkarafer-sbt", file("./akkarafer-sbt")).
+    enablePlugins(ProjectPlugin).
+    settings(
+      scalaVersion := "2.10.5",
+      organization := "com.reactific",
+      titleForDocs := "Akkarafer SBT",
+      codePackage := "com.reactific.akkarafer.sbt",
+      copyrightHolder := "Reactific Software LLC",
+      copyrightYears := Seq(2016),
+      developerUrl := url("http://reactific.com/"),
+      libraryDependencies ++= Seq(
+        ProjectPlugin.pluginModuleID("com.reactific" % "sbt-project" % "0.8.0-SNAPSHOT")
+      )
     )
 
   override def rootProject = Some(akkarafer)
-
-  val scalaV = "2.10"
-  val sbtV = "0.13"
-
-  def pluginModuleID(m: ModuleID) : ModuleID = {
-    m.extra(PomExtraDependencyAttributes.SbtVersionKey -> sbtV,
-      PomExtraDependencyAttributes.ScalaVersionKey -> scalaV)
-      .copy(crossVersion = CrossVersion.Disabled)
-  }
 
 }
