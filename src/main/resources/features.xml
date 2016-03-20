@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="akka.features-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
+
+    <feature name='osgi-compendium' description='OSGi compendium feature' version='${osgi.version}' resolver='(obr)'>
+        <bundle start-level="10">mvn:org.osgi/org.osgi.compendium/${osgi.version}</bundle>
+    </feature>
+
+    <feature name='scala' description='Scala' version='${scala.version}' resolver='(obr)'>
+        <bundle start-level="15">mvn:org.scala-lang/scala-library/${scala.version}</bundle>
+        <bundle start-level="15">mvn:org.scala-lang/scala-reflect/${scala.version}</bundle>
+    </feature>
+
+    <feature name='typesafe-config' description='Typesafe config' version='${typesafe.config.version}' resolver='(obr)'>
+        <bundle start-level="25">mvn:com.typesafe/config/${typesafe.config.version}</bundle>
+    </feature>
+
+    <feature name='akka' description='Akka' version='${akka.version}' resolver='(obr)'>
+        <feature version="${scala.version}">scala</feature>
+        <feature version="${typesafe.config.version}">typesafe-config</feature>
+        <bundle start-level="30">mvn:com.typesafe.akka/akka-actor_${scala.dep.version}/${akka.version}</bundle>
+        <bundle start-level="30">mvn:com.typesafe.akka/akka-osgi_${scala.dep.version}/${akka.version}</bundle>
+        <bundle start-level="30">mvn:com.typesafe.akka/akka-slf4j_${scala.dep.version}/${akka.version}</bundle>
+        <bundle start-level="30">mvn:com.typesafe.akka/akka-http-core_${scala.dep.version}/${akka.version}</bundle>
+        <bundle start-level="30">mvn:com.typesafe.akka/akka-http-experimental_${scala.dep.version}/${akka.version}</bundle>
+    </feature>
+
+</features>

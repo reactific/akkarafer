@@ -17,7 +17,7 @@ import sbt.Keys._
 import sbt._
 
 import com.reactific.sbt.ProjectPlugin
-import com.reactific.sbt.ProjectPlugin.identity._
+import com.reactific.sbt.ProjectPlugin.autoImport._
 import sbtbuildinfo.BuildInfoKeys._
 import scoverage.ScoverageSbtPlugin
 
@@ -54,7 +54,7 @@ object AkkaraferBuild extends Build {
 
 
   lazy val akkarafer = Project("akkarafer", file(".")).
-    enablePlugins(ProjectPlugin).
+    enablePlugins(ProjectPlugin, Karaf).
     settings(
       scalaVersion := "2.11.7",
       organization := "com.reactific",
@@ -71,12 +71,15 @@ object AkkaraferBuild extends Build {
       ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := classesIgnoredByScoverage,
       libraryDependencies ++= root_dependencies
     ).
-    aggregate(sbt)
+    aggregate(akkarafer_sbt_plugin)
 
-  lazy val sbt = Project("akkarafer-sbt", file("./akkarafer-sbt")).
+  val sbt_version = sys.props.getOrElse("sbt.version","0.13.11")
+
+  lazy val akkarafer_sbt_plugin = Project("akkarafer-sbt", file("./akkarafer-sbt")).
     enablePlugins(ProjectPlugin).
     settings(
       scalaVersion := "2.10.5",
+      scalacOptions := com.reactific.sbt.Compiler.scalac_2_10_options,
       organization := "com.reactific",
       titleForDocs := "Akkarafer SBT",
       codePackage := "com.reactific.akkarafer.sbt",
@@ -84,7 +87,8 @@ object AkkaraferBuild extends Build {
       copyrightYears := Seq(2016),
       developerUrl := url("http://reactific.com/"),
       libraryDependencies ++= Seq(
-        ProjectPlugin.pluginModuleID("com.reactific" % "sbt-project" % "0.8.0-SNAPSHOT")
+        "org.scala-sbt" % "sbt" % sbt_version % "provided",
+        ProjectPlugin.pluginModuleID("com.reactific" % "sbt-project" % "0.8.0")
       )
     )
 

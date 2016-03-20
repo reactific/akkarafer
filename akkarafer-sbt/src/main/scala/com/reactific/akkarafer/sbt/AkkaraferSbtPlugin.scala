@@ -15,6 +15,7 @@
 
 package com.reactific.akkarafer.sbt
 
+import com.reactific.sbt.ProjectPluginTrait
 import sbt._
 import sbt.Keys._
 
@@ -38,7 +39,7 @@ case class Feature(
 }
 
 /** An SBT Plugin For Akka/Karaf Projects */
-object AkkaraferSbtPlugin extends AutoPlugin {
+object AkkaraferSbtPlugin extends ProjectPluginTrait {
 
   object branding {
     val welcome = settingKey[String]("The welcome banner to display in the console per your branding.")
@@ -49,6 +50,11 @@ object AkkaraferSbtPlugin extends AutoPlugin {
     val features = settingKey[Feature]("The features to be ")
   }
 
+  override def projectSettings: Seq[Setting[_]] = super.projectSettings ++ Seq(
+    libraryDependencies ++= Seq(
+      "com.reactific" %% "akkarafer" % version.value
+    )
+  )
 }
 
 
