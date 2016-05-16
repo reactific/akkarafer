@@ -17,15 +17,15 @@ import sbt.Keys._
 import sbt._
 
 import com.reactific.sbt.ProjectPlugin
-import com.reactific.sbt.ProjectPlugin.autoImport._
+import com.reactific.sbt.settings._
 import sbtbuildinfo.BuildInfoKeys._
-import scoverage.ScoverageSbtPlugin
+import scoverage.ScoverageKeys
 
 /** Main Build Definition For RestOmnia */
 object AkkaraferBuild extends Build {
 
   object Vers {
-    val akka = "2.4.2"
+    val akka = "2.4.4"
     val config = "1.3.0"
     val domino = "1.1.1"
     val karaf = "4.0.4"
@@ -33,6 +33,8 @@ object AkkaraferBuild extends Build {
 
   val root_dependencies = Seq(
     "org.apache.karaf" % "apache-karaf" % "4.0.4",
+    "org.apache.karaf.cellar" % "org.apache.karaf.cellar.core" % "4.0.0",
+    "org.apache.karaf.cellar" % "org.apache.karaf.cellar.hazelcast" % "4.0.0",
     "com.github.domino-osgi" %% "domino" % Vers.domino,
     "org.ops4j.pax.url" % "pax-url-link" % "2.4.6",
     "org.ops4j.pax.url" % "pax-url-mvn" % "1.3.6",
@@ -66,9 +68,9 @@ object AkkaraferBuild extends Build {
       maxErrors := 50,
       buildInfoObject := "BuildInfo",
       buildInfoPackage := "com.reactific.akkarafer",
-      ScoverageSbtPlugin.ScoverageKeys.coverageMinimum := 90,
-      ScoverageSbtPlugin.ScoverageKeys.coverageFailOnMinimum := true,
-      ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := classesIgnoredByScoverage,
+      ScoverageKeys.coverageMinimum := 90,
+      ScoverageKeys.coverageFailOnMinimum := true,
+      ScoverageKeys.coverageExcludedPackages := classesIgnoredByScoverage,
       libraryDependencies ++= root_dependencies
     ).
     aggregate(akkarafer_sbt_plugin)
@@ -79,7 +81,7 @@ object AkkaraferBuild extends Build {
     enablePlugins(ProjectPlugin).
     settings(
       scalaVersion := "2.10.5",
-      scalacOptions := com.reactific.sbt.Compiler.scalac_2_10_options,
+      scalacOptions := com.reactific.sbt.settings.Compiler.scalac_2_10_options,
       organization := "com.reactific",
       titleForDocs := "Akkarafer SBT",
       codePackage := "com.reactific.akkarafer.sbt",
@@ -88,7 +90,7 @@ object AkkaraferBuild extends Build {
       developerUrl := url("http://reactific.com/"),
       libraryDependencies ++= Seq(
         "org.scala-sbt" % "sbt" % sbt_version % "provided",
-        ProjectPlugin.pluginModuleID("com.reactific" % "sbt-project" % "0.8.0")
+        ProjectPlugin.pluginModuleID("com.reactific" % "sbt-project" % "1.0.3-SNAPSHOT")
       )
     )
 

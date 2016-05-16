@@ -1,0 +1,9 @@
+> publishLocal
+$ exists target/universal/hello-test-0.1.0-SNAPSHOT.zip
+$ exists target/scala-2.11/hello-test_2.11-0.1.0-SNAPSHOT.jar
+$ exists target/scala-2.11/hello-test_2.11-0.1.0-SNAPSHOT.pom
+$ exists target/scala-2.11/hello-test_2.11-0.1.0-SNAPSHOT-javadoc.jar
+$ exists target/scala-2.11/hello-test_2.11-0.1.0-SNAPSHOT-sources.jar
+> ! touch foo
+$ exists foo
+> ! rm foo
